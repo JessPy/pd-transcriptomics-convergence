@@ -54,8 +54,8 @@ cohorts <- list(
     counts_file     = "data/processed/GBA/GBA_mRNA_counts_with_symbols.csv",
     meta_file       = "data/processed/GBA/GBA_metadata.csv",
     comparisons     = list(
-      "IVS_het" = c("GBA1 +/+", "GBA1 IVS/+"),
-      "IVS_hom" = c("GBA1 +/+", "GBA1 IVS/IVS")
+      "IVS_het" = c("GBA1 +/+ (Controles Saudáveis / Wild Type)", "GBA1 IVS/+ (Mutante Heterozigoto)"),
+      "IVS_hom" = c("GBA1 +/+ (Controles Saudáveis / Wild Type)", "GBA1 IVS/IVS (Mutante Homozigoto Nulo)")
     ),
     combined_design = ~ condition
   ),

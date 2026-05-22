@@ -47,6 +47,14 @@ if (gene_name == "SNCA") {
     meta$comparison <- factor(meta$comparison)
     meta$Group <- factor(paste0(meta$genotype, "_", meta$comparison))
     design_formula <- ~ Group
+} else if (gene_name == "GBA1" || gene_name == "GAB1") {
+    # Specific design for GBA1 with three levels
+    meta$comparison <- factor(meta$comparison, levels = c(
+        "GBA1 +/+ (Controles Saudáveis / Wild Type)",
+        "GBA1 IVS/+ (Mutante Heterozigoto)",
+        "GBA1 IVS/IVS (Mutante Homozigoto Nulo)"
+    ))
+    design_formula <- ~ comparison
 } else {
     meta$condition <- factor(meta$condition, levels = c("Control", "Mutant"))
     design_formula <- ~ condition
@@ -82,6 +90,10 @@ if (gene_name == "SNCA") {
     results_list[["Genotype_Triplication_vs_Control_PDamp"]] <- results(dds, contrast=c("Group", "Triplication_SNCA_PDamp", "Control_PDamp"))
     results_list[["Genotype_Triplication_vs_Control_MSAamp"]] <- results(dds, contrast=c("Group", "Triplication_SNCA_MSAamp", "Control_MSAamp"))
 
+} else if (gene_name == "GBA1" || gene_name == "GAB1") {
+    results_list[["Heterozygote_vs_Control"]] <- results(dds, contrast=c("comparison", "GBA1 IVS/+ (Mutante Heterozigoto)", "GBA1 +/+ (Controles Saudáveis / Wild Type)"))
+    results_list[["Homozygote_vs_Control"]] <- results(dds, contrast=c("comparison", "GBA1 IVS/IVS (Mutante Homozigoto Nulo)", "GBA1 +/+ (Controles Saudáveis / Wild Type)"))
+    results_list[["Homozygote_vs_Heterozygote"]] <- results(dds, contrast=c("comparison", "GBA1 IVS/IVS (Mutante Homozigoto Nulo)", "GBA1 IVS/+ (Mutante Heterozigoto)"))
 } else {
     results_list[["Main_Effect_Mutant_vs_Control"]] <- results(dds)
 }
@@ -90,7 +102,7 @@ if (gene_name == "SNCA") {
 vsd <- vst(dds, blind=FALSE)
 
 # PCA Plot
-p_pca <- plotPCA(vsd, intgroup=if(gene_name=="SNCA") c("genotype", "comparison") else "condition") +
+p_pca <- plotPCA(vsd, intgroup=if(gene_name=="SNCA") c("genotype", "comparison") else if (gene_name == "GBA1" || gene_name == "GAB1") "comparison" else "condition") +
   theme_minimal() + labs(title = paste("PCA -", gene_name))
 ggsave(file.path(outdir, "pca_plot.png"), p_pca, width=8, height=6, dpi=300)
 
