@@ -41,7 +41,7 @@ def create_and_export_network(de_file, out_root, gene_name, comparison_name):
         os.makedirs(target_dir, exist_ok=True)
         img_path = os.path.join(target_dir, f"network_{direction}_styled.png")
 
-        gene_list = ",".join(selected_genes['symbol'].dropna().astype(str).tolist())
+        gene_list = ",".join(selected_genes['gene_symbol'].dropna().astype(str).tolist())
         network_title = f"{gene_name}_{comparison_name}_{direction}"
 
         try:
@@ -51,8 +51,8 @@ def create_and_export_network(de_file, out_root, gene_name, comparison_name):
             string_cmd = (
                 f'string protein query query="{gene_list}" '
                 f'species="Homo sapiens" '
-                f'limit=20 '
-                f'cutoff=0.8 '
+                f'limit=15 '
+                f'cutoff=0.5 '
                 f'networkType="full STRING network"'
             )
             p4c.commands.commands_run(string_cmd)
@@ -75,7 +75,7 @@ def create_and_export_network(de_file, out_root, gene_name, comparison_name):
             for target_col in ['display name', 'query term', 'shared name', 'name']:
                 try:
                     p4c.load_table_data(selected_genes[:], 
-                                        data_key_column='symbol', 
+                                        data_key_column='gene_symbol', 
                                         table_key_column=target_col)
                     print(f"    [INFO] Node data loaded successfully using: {target_col}")
                     success_load = True
@@ -120,8 +120,11 @@ def create_and_export_network(de_file, out_root, gene_name, comparison_name):
             except:
                 p4c.layout_network(layout_name='circular')
 
-            p4c.save_session(os.path.join(target_dir, f"network_{direction}.cys"))
-
+            p4c.export_network(
+                filename=os.path.join(target_dir, f"network_{direction}"),
+                type="CX",  # Formato ideal para manter compatibilidade e dados estruturados
+                network=network_title # Nome exato ou SUID da rede no Cytoscape
+)
             # ── Export ──
             csv_path = os.path.join(target_dir, f"genes_{direction}.csv")
             selected_genes.to_csv(csv_path, index=False)
@@ -166,8 +169,9 @@ def main():
             gene = parts[-3]
             
         comp = parts[-1].replace("DE_results_", "").replace(".csv", "")
+        comp_limit = comp + '_0.5-score_15-limit'
         print(f"\n=== Processing genes: {gene} ===")
-        create_and_export_network(f, out_root, gene, comp)
+        create_and_export_network(f, out_root, gene, comp_limit)
 
 if __name__ == "__main__":
     main()
